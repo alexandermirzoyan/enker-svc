@@ -3,38 +3,36 @@ var db = require('./db');
 
 function connect(server) {
   const io = socketIO(server);
-  
-  // TODO: Create namespaces
-  studentList(io);
+  userNamespace(io);
 }
 
 // TODO: List namespace will provide list of logged in users
-function studentList(io) {
-  const list = io.of('/list');
-  list.on('connection', socket => {
+function userNamespace(io) {
+  const users = io.of('/users');
+  users.on('connection', socket => {
 
     socket.on('start-chat', (toUser, fromUser) => {
       if (toUser) {
-        list.in(toUser.email).emit('start-chat', fromUser);
+        users.in(toUser.email).emit('start-chat', fromUser);
       }
     });
 
     socket.on('chat-message', (toUser, fromUser, message) => {
       if (toUser) {
-        list.in(toUser.email).emit('chat-message', fromUser, message);
+        users.in(toUser.email).emit('chat-message', fromUser, message);
       }
     });
 
     socket.on('editor-message', (toUser, fromUser, message) => {
       if (toUser) {
-        list.in(toUser.email).emit('editor-message', fromUser, message);
+        users.in(toUser.email).emit('editor-message', fromUser, message);
       }
     });
 
 
     socket.on('drawing-message', (toUser, fromUser, message) => {
       if (toUser) {
-        list.in(toUser.email).emit('drawing-message', fromUser, message);
+        users.in(toUser.email).emit('drawing-message', fromUser, message);
       }
     });
 
@@ -53,7 +51,7 @@ function studentList(io) {
           } else if(results.value == null) {
             socket.emit('list error', {error: "Student with email " + user.email  + " does not exist."});
           } else {
-            list.emit('logged in', results.value);
+            users.emit('logged in', results.value);
           }
         });
     });
@@ -68,7 +66,7 @@ function studentList(io) {
           } else if(results.value == null) {
             socket.emit('list error', {error: "Socket ID " + socket.id  + " does not exist."});
           } else {
-            list.emit('logged out', results.value);
+            users.emit('logged out', results.value);
           }
         });
     });
@@ -85,7 +83,7 @@ function studentList(io) {
           } else if(results.value == null) {
             socket.emit('list error', {error: "Socket ID " + socket.id  + " does not exist."});
           } else {
-            list.emit('logged out', results.value);
+            users.emit('logged out', results.value);
           }
         });
     });
