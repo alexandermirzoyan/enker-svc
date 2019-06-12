@@ -58,6 +58,7 @@ function userNamespace(io) {
 
     socket.on('disconnect', user => {
       db.getClient().collection("students").findOneAndUpdate(
+        {email:  user.email},
         {$set: {'loggedIn': false}},
         {returnOriginal: false},
         function(err, results) {
@@ -75,6 +76,7 @@ function userNamespace(io) {
       socket.leave(user.email);
 
       db.getClient().collection("students").findOneAndUpdate(
+        {email:  user.email},
         {$set: {'loggedIn': false}},
         {returnOriginal: false},
         function(err, results) {
