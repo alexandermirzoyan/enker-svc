@@ -3,7 +3,7 @@ var db = require('./db');
 
 function connect(server) {
   const io = socketIO(server);
-  
+
   // TODO: Create namespaces
   usersNamespace(io);
 }
@@ -13,7 +13,7 @@ function usersNamespace(io) {
   const users = io.of('/users');
   users.on('connection', socket => {
     // TODO: add listener for starting chat
-    
+
     // TODO: add listener to chat message
 
     // TODO: add listener for editor message WYSIWIG
@@ -25,8 +25,46 @@ function usersNamespace(io) {
     // TODO: add listener on 'disconnect' to log out user, and emit
 
     // TODO: add listener for logout message, update db, emit
-    
+
     // TODO: add listener to search query
+
+    socket.on('login', user => {
+      socket.join(user.email);
+
+      db.getClient().collection('students').findOneAndUpdate(
+        { email: user.email },
+        { $set: { 'loggedIn': true } },
+        { returnOriginal: false },
+        function (err, results) {
+          if (err) {
+            socket.emit('list error', err);
+          } else if (results.value == null) {
+            socket.emit('list error', { error: 'Student with email ' })
+          } else {
+            socket.emit('logged in', results.value)
+          }
+        });
+    });
+
+    socket.on('logout', user => {
+      socket.leave(user.email);
+
+      db.getClient().collection('students').findOneAndUpdate(
+        {email: user.email},
+        {$set: {'loggedIn': false}},
+        {returnOriginal: false},
+        function (err, results) {
+          if (err) {
+            socket.emit('list error', err);
+          } else if (results.value == null) {
+            socket.emit('list error', {error: 'Student with email '})
+          } else {
+            socket.emit('logged out', results.value)
+          }
+        }
+      )
+    })
+
   });
 }
 
