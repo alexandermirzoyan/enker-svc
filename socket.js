@@ -63,7 +63,20 @@ function usersNamespace(io) {
           }
         }
       )
-    })
+    });
+
+    socket.on('search', (data, fn) => {
+      const textCriterias = {$text: {$search: data}};
+      const learningTargetsCriterias = {learningTargets: data};
+      const criteria = {$or: [textCriterias, learningTargetsCriterias]};
+      db.getClient().collection('students').find(criteria).sort().toArray((err, result) => {
+        if (!err) {
+          fn(result);
+        } else {
+          fn(err);
+        }
+      })
+    });
 
   });
 }
